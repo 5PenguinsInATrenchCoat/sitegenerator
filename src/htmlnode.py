@@ -22,20 +22,50 @@ class HTMLNode():
     
 class LeafNode(HTMLNode):
     def __init__(self, tag=None, value=None, props=None):
-        super().__init__(tag, value, props)
+        super().__init__(tag, value, None, props)
         self.children = []
 
     def to_html(self):
         if self.value is None:
-            raise ValueError("Please enter a value")
+            raise ValueError("LeafNode value cannot be None")
         if self.tag is None:
             return self.value
-        props_string = ""
-        if self.props is not None:
-            for key, value in self.props.items():
-                props_string += f' {key}="{value}"'
+        props_string = self.props_to_html()
+        #if self.props:
+        #    for key, value in self.props.items():
+        #        props_string += f' {key}="{value}"'
 
         return f"<{self.tag}{props_string}>{self.value}</{self.tag}>"
     
     def add_child(self, child):
         raise Exception("LeafNode cannot have children!")
+    
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        #props is the only optional field
+        super().__init__(tag, None, children, props)
+
+    def to_html(self):
+        if self.tag is None:
+            raise ValueError("Parent Node must have a tag")
+        if self.children is None:
+            raise ValueError("Parent Node must have children")
+        #Check for tag and children, raise error if either are empty
+
+        props_string = ""
+        if self.props is not None:
+            for key, value in self.props.items():
+                props_string += f' {key}="{value}"'
+            #Copy of the props_string from before, stores the same thing
+
+        full_string = f"<{self.tag}{props_string}>"
+        #begin the string to return at the end
+
+        for child in self.children:
+            full_string = full_string + child.to_html()
+            #iterate over each child, adding each to the full_string to return at the end
+
+        full_string += f"</{self.tag}>"
+        #adds the closing tag
+
+        return full_string

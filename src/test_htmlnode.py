@@ -2,6 +2,7 @@ import unittest
 
 from htmlnode import HTMLNode
 from htmlnode import LeafNode
+from htmlnode import ParentNode
 
 
 
@@ -74,6 +75,33 @@ class TestLeafNode(unittest.TestCase):
                 }
             )
             node.to_html()
+
+class TestParentNode(unittest.TestCase):
+    def test_basic(self):
+        child1 = LeafNode("b", "hello bold")
+        child2 = LeafNode("i", "hello italics")
+        node=ParentNode("p", [child1, child2])
+        
+        output = node.to_html()
+        self.assertEqual('<p><b>hello bold</b><i>hello italics</i></p>', output)
+
+    def test_missing_tag(self):
+        node = ParentNode(None, [LeafNode("b", "bold")])
+        with self.assertRaises(ValueError):
+            node.to_html()
+
+    def test_missing_children(self):
+        node = ParentNode("a", None)
+        with self.assertRaises(ValueError):
+            node.to_html()
+
+    def test_props(self):
+        child1 = LeafNode("b", "click here")
+        child2 = LeafNode("a", "view this link")
+        node = ParentNode("p", [child1, child2], {"href": "youtube.com"})
+
+        output = node.to_html()
+        self.assertEqual('<p href="youtube.com"><b>click here</b><a>view this link</a></p>', output)
 
 
 
